@@ -14,13 +14,18 @@ interface DeletedProject {
 
 export function DeletedProjects({ projects }: { projects: DeletedProject[] }) {
   const [open, setOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   if (projects.length === 0) return null
 
   function handleRestore(id: string) {
     if (!confirm('Restore this project and all its tasks?')) return
-    startTransition(() => restoreProject(id))
+    setError(null)
+    startTransition(async () => {
+      const result = await restoreProject(id)
+      if (result?.error) setError(result.error)
+    })
   }
 
   function handlePermanentDelete(id: string) {
@@ -47,6 +52,12 @@ export function DeletedProjects({ projects }: { projects: DeletedProject[] }) {
         </svg>
         Recently Deleted ({projects.length})
       </button>
+
+      {open && error && (
+        <p className="mt-3 rounded-lg bg-[#E54D2E]/10 px-4 py-3 text-sm text-[#E54D2E] dark:text-[#F0613E]">
+          {error}
+        </p>
+      )}
 
       {open && (
         <div className="mt-3 space-y-2">

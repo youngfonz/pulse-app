@@ -376,10 +376,11 @@ export async function restoreProject(id: string) {
     if (!project) return
 
     // Trashed projects don't count toward the plan limit, so restoring one is a
-    // new project as far as the limit is concerned.
+    // new project as far as the limit is concerned. Returned rather than thrown:
+    // Next redacts server action error messages in production.
     const limit = await checkLimit('projects')
     if (!limit.allowed) {
-      throw new Error(`Plan limit reached: ${limit.limit} projects. Upgrade to restore this project.`)
+      return { error: `You're at your plan limit of ${limit.limit} projects. Upgrade to restore this one.` }
     }
 
     await prisma.project.update({
@@ -392,7 +393,7 @@ export async function restoreProject(id: string) {
     revalidatePath('/tasks')
   } catch (error) {
     console.error('Failed to restore project:', error)
-    throw error instanceof Error ? error : new Error('Failed to restore project')
+    throw new Error('Failed to restore project')
   }
 }
 
