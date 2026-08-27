@@ -51,7 +51,7 @@ export async function POST(
         select: { status: true },
       })
       const allCompleted = realTasks.length > 0 && realTasks.every(t => t.status === 'done')
-      const project = await prisma.project.findUnique({
+      const project = await prisma.project.findFirst({
         where: { id: task.projectId },
         select: { status: true },
       })

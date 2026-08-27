@@ -29,6 +29,9 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
       secretKey: process.env.CLERK_SECRET_KEY!,
     })
     if (payload.sub) {
+      if (await isSuspended(payload.sub)) {
+        return { error: 'Account suspended', status: 403 }
+      }
       return { userId: payload.sub }
     }
   } catch {
@@ -45,11 +48,27 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
     return { error: 'Invalid token', status: 401 }
   }
 
+  if (subscription.suspendedAt) {
+    return { error: 'Account suspended', status: 403 }
+  }
+
   if (subscription.plan !== 'pro' && subscription.plan !== 'team' && !isAdminUser(subscription.userId)) {
     return { error: 'Pro plan required for API access', status: 403 }
   }
 
   return { userId: subscription.userId }
+}
+
+/**
+ * Suspension is enforced in the web app by LayoutWrapper. The API is a separate
+ * entry point (mobile app, Siri shortcuts), so it has to check independently.
+ */
+async function isSuspended(userId: string): Promise<boolean> {
+  const subscription = await prisma.subscription.findUnique({
+    where: { userId },
+    select: { suspendedAt: true },
+  })
+  return !!subscription?.suspendedAt
 }
 
 /**

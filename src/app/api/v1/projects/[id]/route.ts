@@ -139,7 +139,9 @@ export async function DELETE(
     const existing = await prisma.project.findFirst({ where: { id, userId } })
     if (!existing) return apiError('Project not found', 404)
 
-    await prisma.project.delete({ where: { id } })
+    // Soft delete, matching the web UI — the project stays recoverable from the
+    // trash rather than cascade-deleting its tasks, time entries and images.
+    await prisma.project.update({ where: { id }, data: { deletedAt: new Date() } })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('API v1/projects/[id] DELETE error:', error)

@@ -65,6 +65,7 @@ export async function getClients(search?: string, status?: string, sort?: string
       where,
       include: {
         projects: {
+          where: { deletedAt: null },
           select: {
             id: true,
             status: true,
@@ -97,6 +98,7 @@ export async function getClient(id: string) {
       where: { id, userId },
       include: {
         projects: {
+          where: { deletedAt: null },
           include: {
             _count: {
               select: { tasks: true },

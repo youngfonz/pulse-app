@@ -3,7 +3,8 @@
 -- =============================================================
 -- Usage:
 --   1. Create a Neon branch from BEFORE the deletion at console.neon.tech
---   2. Connect to that branch (psql or Neon SQL Editor)
+--   2. Connect to that branch with psql — this script uses \set and :'project_id',
+--      which are psql meta-commands and will error in the Neon SQL Editor
 --   3. Run Section 1 to find your project
 --   4. Replace YOUR_PROJECT_ID below with the actual ID
 --   5. Run Sections 2-7 to extract all data
@@ -131,8 +132,8 @@ WHERE t."projectId" = :'project_id';
 
 -- 8e. Task Comments INSERT
 SELECT format(
-  'INSERT INTO "TaskComment" (id, content, "taskId", "createdAt", "updatedAt") VALUES (%L, %L, %L, %L, %L);',
-  tc.id, tc.content, tc."taskId", tc."createdAt", tc."updatedAt"
+  'INSERT INTO "TaskComment" (id, content, "taskId", "userId", "createdAt", "updatedAt") VALUES (%L, %L, %L, %L, %L, %L);',
+  tc.id, tc.content, tc."taskId", tc."userId", tc."createdAt", tc."updatedAt"
 ) AS insert_sql
 FROM "TaskComment" tc
 JOIN "Task" t ON tc."taskId" = t.id

@@ -292,7 +292,7 @@ export async function updateProject(id: string, formData: FormData) {
 
     // Verify the client belongs to the project owner (prevent IDOR)
     const clientId = formData.get('clientId') as string
-    const projectOwner = existing?.userId ?? (await prisma.project.findUnique({ where: { id }, select: { userId: true } }))?.userId
+    const projectOwner = existing?.userId ?? (await prisma.project.findFirst({ where: { id }, select: { userId: true } }))?.userId
     if (projectOwner) {
       const client = await prisma.client.findFirst({ where: { id: clientId, userId: projectOwner } })
       if (!client) throw new Error('Client not found')
@@ -374,6 +374,14 @@ export async function restoreProject(id: string) {
       where: { id, userId, deletedAt: { not: null } },
     })
     if (!project) return
+
+    // Trashed projects don't count toward the plan limit, so restoring one is a
+    // new project as far as the limit is concerned. Returned rather than thrown:
+    // Next redacts server action error messages in production.
+    const limit = await checkLimit('projects')
+    if (!limit.allowed) {
+      return { error: `You're at your plan limit of ${limit.limit} projects. Upgrade to restore this one.` }
+    }
 
     await prisma.project.update({
       where: { id },

@@ -54,7 +54,7 @@ export async function PATCH(request: NextRequest) {
         select: { status: true },
       })
       const allCompleted = projectTasks.length > 0 && projectTasks.every(t => t.status === 'done')
-      const project = await prisma.project.findUnique({
+      const project = await prisma.project.findFirst({
         where: { id: task.projectId },
         select: { status: true },
       })

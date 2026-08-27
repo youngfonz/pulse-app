@@ -223,7 +223,7 @@ export async function DELETE(
         select: { status: true },
       })
       const allCompleted = remaining.length > 0 && remaining.every(t => t.status === 'done')
-      const project = await prisma.project.findUnique({
+      const project = await prisma.project.findFirst({
         where: { id: task.projectId },
         select: { status: true },
       })

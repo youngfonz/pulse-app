@@ -204,7 +204,11 @@ export async function getInvoiceByToken(token: string) {
     const total = subtotal + subtotal * (invoice.taxRate / 100)
     const status = invoice.status === 'sent' && invoice.dueDate < new Date() ? 'overdue' : invoice.status
 
-    return { ...invoice, status, subtotal, total }
+    // Anyone holding the link reaches this, so keep internal identifiers out of
+    // the payload — the page renders none of them.
+    const { userId: _userId, shareToken: _shareToken, clientId: _clientId, projectId: _projectId, ...publicFields } = invoice
+
+    return { ...publicFields, status, subtotal, total }
   } catch (error) {
     console.error('Failed to fetch invoice by token:', error)
     return null
@@ -223,6 +227,7 @@ export async function getClientsForInvoice() {
         email: true,
         company: true,
         projects: {
+          where: { deletedAt: null },
           select: {
             id: true,
             name: true,
