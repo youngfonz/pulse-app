@@ -19,7 +19,7 @@ export async function grantProjectAccess(
 
   if (targetUserId === userId) throw new Error('Cannot grant access to yourself')
 
-  const project = await prisma.project.findUnique({
+  const project = await prisma.project.findFirst({
     where: { id: projectId },
     select: { id: true, userId: true },
   })
@@ -64,7 +64,7 @@ export async function grantProjectAccessByEmail(
   const emailTrimmed = email.trim().toLowerCase()
   if (!emailTrimmed || !emailTrimmed.includes('@')) throw new Error('Invalid email address')
 
-  const project = await prisma.project.findUnique({
+  const project = await prisma.project.findFirst({
     where: { id: projectId },
     select: { id: true, userId: true },
   })
@@ -131,7 +131,7 @@ export async function revokeProjectAccess(
 export async function getProjectMembers(projectId: string) {
   await requireProjectAccess(projectId, 'viewer')
 
-  const project = await prisma.project.findUnique({
+  const project = await prisma.project.findFirst({
     where: { id: projectId },
     select: { userId: true },
   })

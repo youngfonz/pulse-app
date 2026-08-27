@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const { userId } = auth
 
     // Check maintenance mode
-    const config = await prisma.systemConfig.findUnique({ where: { key: 'maintenance' } })
+    const config = await prisma.systemConfig.findUnique({ where: { key: 'maintenance_mode' } })
     if (config?.value === 'true' && !isAdminUser(userId)) {
       return apiError('System is under maintenance', 503)
     }

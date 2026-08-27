@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { exchangeSlackCode } from '@/lib/slack'
 import { getSubscriptionForUser } from '@/lib/subscription'
@@ -12,9 +13,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/settings?slack=error#slack', request.url))
   }
 
+  // The callback must come from the signed-in user who started the flow. Without
+  // this, anyone could replay their own Slack `code` with a victim's userId as
+  // `state` and attach their Slack workspace to the victim's account.
+  const { userId } = await auth()
+  if (!userId || userId !== state) {
+    return NextResponse.redirect(new URL('/settings?slack=error#slack', request.url))
+  }
+
   // Gate: only Pro/Team users can connect Slack
   try {
-    const sub = await getSubscriptionForUser(state)
+    const sub = await getSubscriptionForUser(userId)
     if (sub.plan === 'free') {
       return NextResponse.redirect(new URL('/settings?slack=upgrade#slack', request.url))
     }
@@ -29,7 +38,7 @@ export async function GET(request: NextRequest) {
   }
 
   await prisma.subscription.update({
-    where: { userId: state },
+    where: { userId },
     data: {
       slackTeamId: token.team.id,
       slackUserId: token.authed_user.id,

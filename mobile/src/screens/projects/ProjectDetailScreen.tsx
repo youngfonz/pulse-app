@@ -30,6 +30,12 @@ export function ProjectDetailScreen({ route }: Props) {
     }
   }, [project?.id])
 
+  useEffect(() => {
+    if (!project && !isLoading) {
+      navigation.goBack()
+    }
+  }, [project, isLoading, navigation])
+
   if (isLoading && !project) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -39,12 +45,6 @@ export function ProjectDetailScreen({ route }: Props) {
       </SafeAreaView>
     )
   }
-
-  useEffect(() => {
-    if (!project && !isLoading) {
-      navigation.goBack()
-    }
-  }, [project, isLoading, navigation])
 
   if (!project && !isLoading) {
     return null

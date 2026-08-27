@@ -192,6 +192,12 @@ export function TaskDetailScreen({ route, navigation }: Props) {
     setCommentText('')
   }
 
+  useEffect(() => {
+    if (!task && !isLoading) {
+      navigation.goBack()
+    }
+  }, [task, isLoading, navigation])
+
   if (isLoading && !task) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -201,12 +207,6 @@ export function TaskDetailScreen({ route, navigation }: Props) {
       </SafeAreaView>
     )
   }
-
-  useEffect(() => {
-    if (!task && !isLoading) {
-      navigation.goBack()
-    }
-  }, [task, isLoading, navigation])
 
   if (!task && !isLoading) {
     return null

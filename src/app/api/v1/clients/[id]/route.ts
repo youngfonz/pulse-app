@@ -23,6 +23,7 @@ export async function GET(
       where: { id, userId },
       include: {
         projects: {
+          where: { deletedAt: null },
           include: {
             _count: { select: { tasks: true } },
           },

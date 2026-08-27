@@ -52,7 +52,7 @@ export async function createTask(projectId: string | null, formData: FormData) {
       const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
       if (!project) {
         await requireProjectAccess(projectId, 'editor')
-        const shared = await prisma.project.findUnique({ where: { id: projectId }, select: { userId: true } })
+        const shared = await prisma.project.findFirst({ where: { id: projectId }, select: { userId: true } })
         if (!shared || !shared.userId) throw new Error('Project not found')
         taskUserId = shared.userId
       }
@@ -141,7 +141,7 @@ export async function updateTask(id: string, formData: FormData) {
         if (task.userId !== userId) throw new Error('Not authorized to remove shared task from its project')
       } else {
         await requireProjectAccess(nextProjectId, 'editor')
-        const destination = await prisma.project.findUnique({
+        const destination = await prisma.project.findFirst({
           where: { id: nextProjectId },
           select: { userId: true },
         })
@@ -213,7 +213,7 @@ export async function toggleTask(id: string) {
         select: { status: true },
       })
       const allCompleted = realTasks.length > 0 && realTasks.every(t => t.status === 'done')
-      const project = await prisma.project.findUnique({
+      const project = await prisma.project.findFirst({
         where: { id: task.projectId },
         select: { status: true },
       })
@@ -267,7 +267,7 @@ export async function deleteTask(id: string) {
         select: { status: true },
       })
       const allCompleted = remaining.length > 0 && remaining.every(t => t.status === 'done')
-      const project = await prisma.project.findUnique({
+      const project = await prisma.project.findFirst({
         where: { id: task.projectId },
         select: { status: true },
       })
@@ -804,7 +804,7 @@ export async function createBookmarkTask(
     const project = await prisma.project.findFirst({ where: { id: projectId, userId } })
     if (!project) {
       await requireProjectAccess(projectId, 'editor')
-      const shared = await prisma.project.findUnique({ where: { id: projectId }, select: { userId: true } })
+      const shared = await prisma.project.findFirst({ where: { id: projectId }, select: { userId: true } })
       if (!shared || !shared.userId) throw new Error('Project not found')
       taskUserId = shared.userId
     }

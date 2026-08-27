@@ -28,7 +28,7 @@ export async function GET(
     }
     if (!hasAccess) return apiError('Project not found', 404)
 
-    const project = await prisma.project.findUnique({
+    const project = await prisma.project.findFirst({
       where: { id: projectId },
       select: { userId: true },
     })
@@ -90,7 +90,7 @@ export async function POST(
     if (targetUserId === userId) return apiError('Cannot grant access to yourself', 400)
 
     // Check if target is already owner
-    const projectRecord = await prisma.project.findUnique({
+    const projectRecord = await prisma.project.findFirst({
       where: { id: projectId },
       select: { userId: true },
     })

@@ -28,7 +28,9 @@ export function CreateInvoiceScreen({ navigation }: Props) {
 
   const [clientId, setClientId] = useState('')
   const [projectId, setProjectId] = useState('')
-  const [dueDate, setDueDate] = useState(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
+  // Lazy initialiser — evaluating Date.now() inline runs on every render and
+  // makes the first render non-deterministic.
+  const [dueDate, setDueDate] = useState(() => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [taxRate, setTaxRate] = useState('0')
   const [notes, setNotes] = useState('')
